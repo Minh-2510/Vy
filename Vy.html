@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thông điệp Robot - Chúc mừng 20/10</title>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Playfair+Display:ital,wght@1,600&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #05020a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      font-family: 'Comfortaa', cursive, sans-serif;
+      position: relative;
+      color: #fff;
+      padding: 20px 0;
+      user-select: none;
+    }
+
+    /* Bụi sao vũ trụ */
+    canvas#stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Canvas pháo hoa bắn 2 bên */
+    canvas#fireworks {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 18;
+      pointer-events: none;
+    }
+
+    /* Vùng chứa hoa và trái tim rơi */
+    .effects-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 15;
+      overflow: hidden;
+    }
+
+    .falling-item {
+      position: absolute;
+      user-select: none;
+      pointer-events: none;
+      animation: fallAcross linear infinite;
+      filter: drop-shadow(0 0 6px rgba(255, 105, 180, 0.6));
+    }
+
+    @keyframes fallAcross {
+      0% {
+        transform: translate(0, -10vh) rotate(0deg) scale(0.6);
+        opacity: 0;
+      }
+      10% { opacity: 1; }
+      90% { opacity: 0.95; }
+      100% {
+        transform: translate(140px, 110vh) rotate(360deg) scale(1.15);
+        opacity: 0;
+      }
+    }
+
+    .rising-heart {
+      position: absolute;
+      bottom: -40px;
+      user-select: none;
+      pointer-events: none;
+      animation: riseUp linear forwards;
+      filter: drop-shadow(0 0 8px rgba(255, 51, 133, 0.8));
+    }
+
+    @keyframes riseUp {
+      0% {
+        transform: translateY(0) scale(0.5) rotate(0deg);
+        opacity: 0;
+      }
+      15% { opacity: 1; }
+      85% { opacity: 0.9; }
+      100% {
+        transform: translateY(-115vh) scale(1.2) rotate(25deg);
+        opacity: 0;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 95%;
+      max-width: 750px;
+    }
+
+    /* ====================================================
+       SLIDE 1: TRÁI TIM HẠT TO + ĐẬP NHANH
+    ==================================================== */
+    #introHeartSlide {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 520px;
+      animation: fadeIn 0.8s ease;
+    }
+    #introHeartSlide.active {
+      display: flex;
+    }
+
+    #heartCanvas {
+      width: 440px;
+      height: 440px;
+      max-width: 95vw;
+      max-height: 55vh;
+      filter: drop-shadow(0 0 25px rgba(255, 30, 100, 0.8)) drop-shadow(0 0 45px rgba(255, 0, 85, 0.4));
+    }
+
+    .intro-message {
+      font-size: 1.28rem;
+      line-height: 1.6;
+      color: #ffe4f0;
+      max-width: 600px;
+      margin-top: 5px;
+      text-shadow: 0 0 12px rgba(255, 105, 180, 0.7), 0 0 25px rgba(255, 42, 112, 0.5);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 20px;
+      margin-top: 25px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-choice {
+      padding: 12px 28px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border-radius: 30px;
+      cursor: pointer;
+      border: none;
+      font-family: 'Comfortaa', cursive, sans-serif;
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      outline: none;
+    }
+
+    .btn-yes {
+      background: linear-gradient(135deg, #ff2a70, #ff758c);
+      color: #fff;
+      box-shadow: 0 0 18px rgba(255, 42, 112, 0.6), 0 4px 15px rgba(0, 0, 0, 0.3);
+      animation: pulseBtn 1.6s infinite alternate;
+    }
+    .btn-yes:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 28px rgba(255, 42, 112, 0.9);
+    }
+
+    .btn-no {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ddd;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .btn-no:hover {
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+    }
+
+    @keyframes pulseBtn {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.06); box-shadow: 0 0 25px rgba(255, 42, 112, 0.8); }
+    }
+
+    /* ====================================================
+       SLIDE 2: THÔNG BÁO VÀ ĐẾM NGƯỢC 3 2 1
+    ==================================================== */
+    #countdownSlide {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 380px;
+      width: 100%;
+      animation: fadeIn 0.6s ease;
+    }
+    #countdownSlide.active {
+      display: flex;
+    }
+
+    .countdown-announcement {
+      font-size: 1.35rem;
+      line-height: 1.7;
+      color: #ffe4f0;
+      max-width: 600px;
+      margin-bottom: 25px;
+      text-shadow: 0 0 15px rgba(255, 105, 180, 0.8), 0 0 30px rgba(255, 42, 112, 0.6);
+    }
+
+    .countdown-number {
+      font-size: 5.5rem;
+      font-weight: 700;
+      color: #00f2fe;
+      text-shadow: 0 0 25px #00f2fe, 0 0 50px rgba(0, 242, 254, 0.8);
+      animation: popCount 0.85s ease infinite;
+    }
+
+    @keyframes popCount {
+      0% { transform: scale(0.6); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ====================================================
+       KHU VỰC ROBOT CHÍNH
+    ==================================================== */
+    #robotMainStage {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      animation: fadeIn 0.7s ease;
+    }
+    #robotMainStage.active {
+      display: flex;
+    }
+
+    .robot-face {
+      display: flex;
+      gap: 36px;
+      margin-bottom: 25px;
+      position: relative;
+      align-items: center;
+      justify-content: center;
+      height: 95px;
+    }
+
+    .eye-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .eye {
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle at 45% 45%, #ffffff 0%, #00f2fe 55%, #0099ff 100%);
+      border-radius: 26px;
+      box-shadow: 
+        0 0 16px rgba(255, 255, 255, 0.9),
+        0 0 32px #00f2fe,
+        0 0 60px rgba(0, 242, 254, 0.7),
+        0 0 85px rgba(0, 198, 255, 0.4);
+      transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    }
+
+    .eye.blink {
+      height: 6px !important;
+      margin-top: 37px;
+      border-radius: 6px !important;
+      background: #00f2fe;
+    }
+
+    .eye.happy {
+      height: 24px !important;
+      margin-top: 15px;
+      background: transparent !important;
+      border-top: 8px solid #00f2fe;
+      border-radius: 50px 50px 0 0 !important;
+      box-shadow: 
+        0 -4px 15px #00f2fe,
+        0 -8px 25px rgba(0, 242, 254, 0.8) !important;
+    }
+
+    .eye.squint {
+      height: 10px !important;
+      margin-top: 35px;
+      border-radius: 8px !important;
+      background: #00f2fe;
+    }
+
+    .eye.sad {
+      height: 22px !important;
+      margin-top: 30px;
+      background: transparent !important;
+      border-bottom: 8px solid #00f2fe;
+      border-radius: 0 0 50px 50px !important;
+      box-shadow: 0 4px 18px #00f2fe, 0 8px 28px rgba(0, 242, 254, 0.6) !important;
+    }
+
+    .tear {
+      position: absolute;
+      width: 7px;
+      height: 14px;
+      background: #00f2fe;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      bottom: -22px;
+      opacity: 0;
+      box-shadow: 0 0 10px #00f2fe;
+      animation: tearDrop 1.2s infinite;
+      display: none;
+    }
+    .robot-sad .tear { display: block; }
+
+    @keyframes tearDrop {
+      0% { transform: translateY(0) scale(0.7); opacity: 1; }
+      80% { transform: translateY(18px) scale(1); opacity: 0.8; }
+      100% { transform: translateY(24px) scale(0.3); opacity: 0; }
+    }
+
+    .blush {
+      position: absolute;
+      bottom: -20px;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      color: #ff3377;
+      text-shadow: 0 0 8px #ff3377;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: all 0.35s ease;
+      pointer-events: none;
+    }
+
+    .show-blush .blush {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .caption-box {
+      min-height: 55px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    .caption {
+      font-size: 1.45rem;
+      letter-spacing: 0.6px;
+      color: #f7e7ff;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.6), 0 0 25px rgba(230, 160, 255, 0.4);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    .caption.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #sadRetryBox {
+      display: none;
+      margin-top: 15px;
+    }
+    #sadRetryBox.active {
+      display: flex;
+      gap: 15px;
+    }
+
+    .photo-area {
+      width: 100%;
+      min-height: 260px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .single-frame {
+      width: 230px;
+      height: 230px;
+      position: relative;
+      display: none;
+      animation: popPhoto 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .single-frame.active { display: block; }
+    .single-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 20px;
+      border: 3px solid #ffb6c1;
+      box-shadow: 0 0 25px rgba(255, 105, 180, 0.45);
+    }
+
+    .all-photos-grid {
+      display: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      max-width: 520px;
+      width: 100%;
+      animation: popPhoto 0.7s ease;
+    }
+    .all-photos-grid.active { display: grid; }
+    .all-photos-grid img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 2px solid #ffccd5;
+      box-shadow: 0 4px 15px rgba(255, 20, 147, 0.3);
+      transition: transform 0.3s ease;
+    }
+    .all-photos-grid img:hover {
+      transform: scale(1.08);
+      z-index: 5;
+    }
+
+    .letter-frame {
+      display: none;
+      width: 92%;
+      max-width: 500px;
+      background: linear-gradient(135deg, #fffcf5 0%, #ffeef2 100%);
+      color: #3d2b3d;
+      padding: 26px 28px;
+      border-radius: 16px;
+      box-shadow: 0 0 30px rgba(255, 182, 193, 0.6), inset 0 0 15px rgba(255, 220, 230, 0.8);
+      border: 2px dashed #f79ac0;
+      text-align: left;
+      font-family: 'Comfortaa', cursive, sans-serif;
+      animation: popPhoto 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+    .letter-frame.active { display: block; }
+    .letter-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.8rem;
+      color: #d81b60;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .letter-content {
+      font-size: 1rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      min-height: 110px;
+      color: #4a2c40;
+    }
+    .letter-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1.1em;
+      background-color: #d81b60;
+      vertical-align: text-bottom;
+      margin-left: 2px;
+      animation: blinkCursor 0.7s infinite;
+    }
+    @keyframes blinkCursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    @keyframes popPhoto {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .player-corner {
+      position: fixed;
+      bottom: 20px;
+      left: 25px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 20;
+      cursor: pointer;
+    }
+    .vinyl-disc {
+      width: 46px;
+      height: 46px;
+      background: radial-gradient(circle, #ff69b4 15%, #111 16%, #222 35%, #111 40%, #333 70%, #111 100%);
+      border-radius: 50%;
+      border: 2px solid #555;
+      box-shadow: 0 0 12px rgba(255, 105, 180, 0.4);
+      animation: spin 3s linear infinite;
+    }
+    .vinyl-disc.paused {
+      animation-play-state: paused;
+      opacity: 0.6;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    
+    .lyrics {
+      font-size: 0.9rem;
+      color: #ffb6c1;
+      font-style: italic;
+      font-family: 'Playfair Display', serif;
+    }
+
+    #start-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 5, 15, 0.96);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      text-align: center;
+      padding: 20px;
+    }
+    #start-overlay h2 {
+      font-size: 1.6rem;
+      color: #00f2fe;
+      margin-bottom: 12px;
+      text-shadow: 0 0 15px #00f2fe;
+    }
+    #start-overlay p { color: #bbb; font-size: 0.95rem; }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: scale(0.92); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="start-overlay" onclick="startShow()">
+    <h2>💌 Chạm vào màn hình có điều bất ngờ nè 💌</h2>
+    <p>(Bật loa hoặc đeo tai nghe để nghe nhạc nhé ✨)</p>
+  </div>
+
+  <canvas id="stars"></canvas>
+  <canvas id="fireworks"></canvas>
+  <div class="effects-container" id="effectsContainer"></div>
+
+  <div class="container">
+    <!-- SLIDE 1: TRÁI TIM HẠT TO + ĐẬP NHANH -->
+    <div id="introHeartSlide">
+      <canvas id="heartCanvas"></canvas>
+      <div class="intro-message" id="introMsg">
+        Thưa tiểu thư, hôm nay tôi nhận lời chủ nhân gửi tiểu thư một món quà...<br>
+        <span style="color: #ff99c8; font-weight: bold;">Tiểu thư có muốn lắng nghe không ạ? ✨</span>
+      </div>
+      <div class="button-group" id="btnGroup">
+        <button class="btn-choice btn-yes" id="btnYes" onclick="handleChoice(true)">Có nha ✨</button>
+        <button class="btn-choice btn-no" id="btnNo" onclick="handleChoice(false)">Không thèm 🥺</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: THÔNG BÁO VÀ ĐẾM NGƯỢC 3 2 1 -->
+    <div id="countdownSlide">
+      <div class="countdown-announcement">
+        Sau đây là những lời chủ nhân Minh muốn gửi tới tiểu thư Vy... ❤️
+      </div>
+      <div class="countdown-number" id="countdownNum">3</div>
+    </div>
+
+    <!-- SLIDE 3: MẮT ROBOT VÀ KỊCH BẢN CHÍNH -->
+    <div id="robotMainStage">
+      <div class="robot-face" id="robotFace">
+        <div class="eye-wrapper">
+          <div class="eye" id="eyeLeft"></div>
+          <div class="tear"></div>
+          <span class="blush">////</span>
+        </div>
+        <div class="eye-wrapper">
+          <div class="eye" id="eyeRight"></div>
+          <div class="tear"></div>
+          <span class="blush">////</span>
+        </div>
+      </div>
+
+      <div class="caption-box">
+        <div class="caption" id="captionText">...</div>
+      </div>
+
+      <div class="button-group" id="sadRetryBox">
+        <button class="btn-choice btn-yes" id="btnSadYes" onclick="acceptAfterBegging()">Thôi được rồi, bấm Có nè ❤️</button>
+        <button class="btn-choice btn-no" onclick="handleChoice(false)">Vẫn không 😝</button>
+      </div>
+
+      <div class="photo-area">
+        <div class="single-frame" id="slide1"><img src="anh1.jpg" alt="Ảnh 1"></div>
+        <div class="single-frame" id="slide2"><img src="anh2.jpg" alt="Ảnh 2"></div>
+        <div class="single-frame" id="slide3"><img src="anh3.jpg" alt="Ảnh 3"></div>
+        <div class="single-frame" id="slide4"><img src="anh4.jpg" alt="Ảnh 4"></div>
+        <div class="single-frame" id="slide5"><img src="anh5.jpg" alt="Ảnh 5"></div>
+
+        <div class="all-photos-grid" id="slideAll">
+          <img src="anh1.jpg" alt="Ảnh 1">
+          <img src="anh2.jpg" alt="Ảnh 2">
+          <img src="anh3.jpg" alt="Ảnh 3">
+          <img src="anh4.jpg" alt="Ảnh 4">
+          <img src="anh5.jpg" alt="Ảnh 5">
+          <img src="anh6.jpg" alt="Ảnh 6">
+        </div>
+
+        <div class="letter-frame" id="slideLetter">
+          <div class="letter-title">Thư gửi em bé 💌</div>
+          <div class="letter-content"><span id="typewriterText"></span><span class="letter-cursor" id="typewriterCursor"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="player-corner" onclick="toggleAudio()">
+    <div class="vinyl-disc" id="disc"></div>
+    <div class="lyrics" id="audioStatus">🎵 Happy 20/10... (Click để tắt/bật)</div>
+  </div>
+
+  <audio id="bgMusic" loop src="nhaccode.mp3"></audio>
+
+  <script>
+    // 1. Nền sao vũ trụ
+    const starCanvas = document.getElementById('stars');
+    const starCtx = starCanvas.getContext('2d');
+    let stars = [];
+    function resizeStars() { starCanvas.width = window.innerWidth; starCanvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeStars);
+    resizeStars();
+    for (let i = 0; i < 90; i++) {
+      stars.push({ 
+        x: Math.random() * starCanvas.width, 
+        y: Math.random() * starCanvas.height, 
+        r: Math.random() * 1.5 + 0.5, 
+        alpha: Math.random(), 
+        speed: Math.random() * 0.02 + 0.005 
+      });
+    }
+    function drawStars() {
+      starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+      stars.forEach(s => {
+        s.alpha += s.speed;
+        let a = (Math.sin(s.alpha) + 1) / 2;
+        starCtx.fillStyle = `rgba(0, 242, 254, ${a * 0.7})`;
+        starCtx.beginPath();
+        starCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        starCtx.fill();
+      });
+      requestAnimationFrame(drawStars);
+    }
+    drawStars();
+
+    // ====================================================
+    // 2. HỆ THỐNG PHÁO HOA BẮN TỪ 2 GÓC LÊN CAO
+    // ====================================================
+    const fwCanvas = document.getElementById('fireworks');
+    const fwCtx = fwCanvas.getContext('2d');
+    function resizeFw() { fwCanvas.width = window.innerWidth; fwCanvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeFw);
+    resizeFw();
+
+    let rockets = [];
+    let sparkles = [];
+    const fwColors = ['#ff2a70', '#00f2fe', '#ffd700', '#ff77a9', '#ffffff', '#a855f7', '#00ff88', '#ff3355', '#ff9900'];
+
+    class Rocket {
+      constructor(fromLeft) {
+        this.x = fromLeft ? fwCanvas.width * 0.06 : fwCanvas.width * 0.94;
+        this.y = fwCanvas.height;
+        const targetX = fromLeft 
+          ? fwCanvas.width * (0.22 + Math.random() * 0.28) 
+          : fwCanvas.width * (0.50 + Math.random() * 0.28);
+        const targetY = fwCanvas.height * (0.10 + Math.random() * 0.25);
+        const angle = Math.atan2(targetY - this.y, targetX - this.x);
+        const speed = Math.random() * 3 + 14;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.targetY = targetY;
+        this.color = fwColors[Math.floor(Math.random() * fwColors.length)];
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.05;
+      }
+      draw() {
+        fwCtx.fillStyle = this.color;
+        fwCtx.shadowBlur = 12;
+        fwCtx.shadowColor = this.color;
+        fwCtx.beginPath();
+        fwCtx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+        fwCtx.fill();
+      }
+    }
+
+    class Sparkle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 11 + 2.5;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.alpha = 1;
+        this.decay = Math.random() * 0.015 + 0.008;
+        this.color = color;
+        this.size = Math.random() * 3 + 1.5;
+      }
+      update() {
+        this.vx *= 0.96;
+        this.vy *= 0.96;
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.07;
+        this.alpha -= this.decay;
+      }
+      draw() {
+        fwCtx.save();
+        fwCtx.globalAlpha = Math.max(0, this.alpha);
+        fwCtx.fillStyle = this.color;
+        fwCtx.shadowBlur = 10;
+        fwCtx.shadowColor = this.color;
+        fwCtx.beginPath();
+        fwCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        fwCtx.fill();
+        fwCtx.restore();
+      }
+    }
+
+    function explodeFirework(x, y, color) {
+      for (let i = 0; i < 140; i++) {
+        sparkles.push(new Sparkle(x, y, color));
+      }
+    }
+
+    function renderFireworks() {
+      fwCtx.clearRect(0, 0, fwCanvas.width, fwCanvas.height);
+      for (let i = rockets.length - 1; i >= 0; i--) {
+        rockets[i].update();
+        rockets[i].draw();
+        if (rockets[i].vy >= 0 || rockets[i].y <= rockets[i].targetY) {
+          explodeFirework(rockets[i].x, rockets[i].y, rockets[i].color);
+          rockets.splice(i, 1);
+        }
+      }
+      for (let i = sparkles.length - 1; i >= 0; i--) {
+        sparkles[i].update();
+        sparkles[i].draw();
+        if (sparkles[i].alpha <= 0) {
+          sparkles.splice(i, 1);
+        }
+      }
+      requestAnimationFrame(renderFireworks);
+    }
+    renderFireworks();
+
+    function launchDoubleFirework() {
+      rockets.push(new Rocket(true));
+      rockets.push(new Rocket(false));
+    }
+
+    let continuousFwInterval = null;
+    function startInfiniteFireworks() {
+      if (continuousFwInterval) return;
+      launchDoubleFirework();
+      continuousFwInterval = setInterval(() => {
+        launchDoubleFirework();
+      }, 400);
+    }
+
+    // ====================================================
+    // 3. TRÁI TIM HẠT: TO HƠN VÀ ĐẬP NHANH HƠN[cite: 1]
+    // ====================================================
+    const hCanvas = document.getElementById('heartCanvas');
+    const hCtx = hCanvas.getContext('2d');
+    hCanvas.width = 520;
+    hCanvas.height = 520;
+
+    function heartFunction(t, scale = 13.5) { // Tăng scale từ 10 lên 13.5 giúp tim to vượt bậc[cite: 1]
+      const x = 16 * Math.pow(Math.sin(t), 3);
+      const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+      return { x: x * scale, y: y * scale };
+    }
+
+    const heartParticles = [];
+    const NUM_PARTICLES = 2200; // Tăng số lượng hạt cho tim dày và rực rỡ hơn
+
+    for (let i = 0; i < NUM_PARTICLES; i++) {
+      const t = Math.random() * Math.PI * 2;
+      const basePos = heartFunction(t);
+      const shrink = Math.pow(Math.random(), 0.55);
+      heartParticles.push({
+        baseX: basePos.x * shrink,
+        baseY: basePos.y * shrink,
+        size: Math.random() * 2.4 + 1,
+        color: Math.random() > 0.25 ? '#ff2a6d' : (Math.random() > 0.5 ? '#ff69b4' : '#ff0055'),
+        alpha: Math.random() * 0.75 + 0.25,
+        driftRadius: Math.random() * 3.5 + 1
+      });
+    }
+
+    let heartBeatTime = 0;
+    let heartAnimationActive = true;
+
+    function drawParticleHeart() {
+      if (!heartAnimationActive) return;
+      hCtx.clearRect(0, 0, hCanvas.width, hCanvas.height);
+
+      // Tăng nhịp đập nhanh hơn rõ rệt (0.055 -> 0.095)
+      heartBeatTime += 0.095;
+      
+      // Co bóp mạnh mẽ và dồn dập
+      const beat = 1 + 0.16 * Math.pow(Math.sin(heartBeatTime), 4) + 0.08 * Math.sin(heartBeatTime * 2);
+
+      const centerX = hCanvas.width / 2;
+      const centerY = hCanvas.height / 2 + 12;
+
+      for (let p of heartParticles) {
+        const jitterX = Math.sin(heartBeatTime * 4 + p.baseX) * p.driftRadius;
+        const jitterY = Math.cos(heartBeatTime * 4 + p.baseY) * p.driftRadius;
+
+        const px = centerX + (p.baseX * beat) + jitterX;
+        const py = centerY + (p.baseY * beat) + jitterY;
+
+        hCtx.fillStyle = p.color;
+        hCtx.globalAlpha = p.alpha;
+        hCtx.beginPath();
+        hCtx.arc(px, py, p.size, 0, Math.PI * 2);
+        hCtx.fill();
+      }
+
+      requestAnimationFrame(drawParticleHeart);
+    }
+
+    // 4. Hiệu ứng hoa & tim rơi
+    const fallingItems = ['🌸', '🌺', '🌹', '🌷', '💐', '✨', '💖', '💕', '💗', '💓', '💘', '❤️'];
+    const heartItems = ['💖', '💕', '💗', '❤️', '💞', '💝', '✨'];
+    const effectsContainer = document.getElementById('effectsContainer');
+
+    function spawnFallingItem() {
+      const el = document.createElement('div');
+      el.classList.add('falling-item');
+      el.innerText = fallingItems[Math.floor(Math.random() * fallingItems.length)];
+      el.style.left = Math.random() * 105 - 5 + 'vw';
+      el.style.fontSize = Math.random() * 16 + 18 + 'px';
+      const duration = Math.random() * 3 + 3.5;
+      el.style.animationDuration = duration + 's';
+      effectsContainer.appendChild(el);
+      setTimeout(() => el.remove(), duration * 1000);
+    }
+
+    function spawnRisingHeart() {
+      const heart = document.createElement('div');
+      heart.classList.add('rising-heart');
+      heart.innerText = heartItems[Math.floor(Math.random() * heartItems.length)];
+      heart.style.left = Math.random() * 96 + 2 + 'vw';
+      heart.style.fontSize = Math.random() * 14 + 16 + 'px';
+      const duration = Math.random() * 3 + 4;
+      heart.style.animationDuration = duration + 's';
+      effectsContainer.appendChild(heart);
+      setTimeout(() => heart.remove(), duration * 1000);
+    }
+
+    function burstEffects(count = 35) {
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          spawnFallingItem();
+          if (i % 2 === 0) spawnRisingHeart();
+        }, i * 60);
+      }
+    }
+
+    // 5. Quản lý hiển thị ảnh
+    function hideAllSlides() {
+      document.querySelectorAll('.single-frame').forEach(el => el.classList.remove('active'));
+      const sAll = document.getElementById('slideAll');
+      if (sAll) sAll.classList.remove('active');
+      const sLet = document.getElementById('slideLetter');
+      if (sLet) sLet.classList.remove('active');
+    }
+
+    function showSinglePhoto(slideId) {
+      hideAllSlides();
+      const target = document.getElementById(slideId);
+      if (target) target.classList.add('active');
+    }
+
+    function showAllPhotos() {
+      hideAllSlides();
+      const sAll = document.getElementById('slideAll');
+      if (sAll) sAll.classList.add('active');
+    }
+
+    // 6. Bức thư tự động gõ chữ & BẮN PHÁO HOA LIÊN TỤC
+    const letterText = `Dù không có nhiều dịp ở bên em trong những ngày anh ở đây, nhưng em vẫn luôn là điều dịu dàng nhất mà Sài Gòn dành cho anh. Cảm ơn em vì đã đến. Anh muốn tới đây nhiều hơn vì nơi đây có em.
+
+Tương lai sau này chúc em luôn bình an, hạnh phúc và nhận được thật nhiều yêu thương xứng đáng. Anh phải về lại Hà Nội rồi, và không biết chúng ta còn dịp gặp lại nữa không. Dù không thể bước tiếp cùng nhau, anh vẫn luôn dõi theo và cầu chúc mọi điều tốt đẹp nhất sẽ đến với em.
+
+Tạm biệt em, người mà anh vẫn luôn thương rất nhiều! ❤️`;
+
+    function showLetterAndType() {
+      hideAllSlides();
+      const sLet = document.getElementById('slideLetter');
+      if (sLet) sLet.classList.add('active');
+      
+      const target = document.getElementById('typewriterText');
+      target.textContent = "";
+      let index = 0;
+
+      function typeChar() {
+        if (index < letterText.length) {
+          target.textContent += letterText.charAt(index);
+          index++;
+          setTimeout(typeChar, 45);
+        } else {
+          startInfiniteFireworks();
+          burstEffects(70);
+          setTimeout(() => {
+            const cursor = document.getElementById('typewriterCursor');
+            if (cursor) cursor.style.display = 'none';
+          }, 3000);
+        }
+      }
+      typeChar();
+    }
+
+    // 7. Điều khiển mắt robot
+    const eyeL = document.getElementById('eyeLeft');
+    const eyeR = document.getElementById('eyeRight');
+    const robotFace = document.getElementById('robotFace');
+    const caption = document.getElementById('captionText');
+
+    function resetEyes() {
+      eyeL.className = 'eye';
+      eyeR.className = 'eye';
+      robotFace.classList.remove('robot-sad');
+    }
+
+    function blinkEyes(times = 1) {
+      resetEyes();
+      let count = 0;
+      let interval = setInterval(() => {
+        eyeL.classList.add('blink'); 
+        eyeR.classList.add('blink');
+        setTimeout(() => { 
+          eyeL.classList.remove('blink'); 
+          eyeR.classList.remove('blink'); 
+        }, 150);
+        count++;
+        if (count >= times) clearInterval(interval);
+      }, 350);
+    }
+
+    function squintEyes() {
+      resetEyes();
+      eyeL.classList.add('squint');
+      eyeR.classList.add('squint');
+    }
+
+    function happyEyes() {
+      resetEyes();
+      eyeL.classList.add('happy');
+      eyeR.classList.add('happy');
+    }
+
+    function sadEyes() {
+      resetEyes();
+      eyeL.classList.add('sad');
+      eyeR.classList.add('sad');
+      robotFace.classList.add('robot-sad');
+    }
+
+    function setCaption(text) {
+      caption.classList.remove('active');
+      setTimeout(() => {
+        caption.innerText = text;
+        caption.classList.add('active');
+      }, 350);
+    }
+
+    // 8. Xử lý nút bấm, năn nỉ & đếm ngược
+    let begCount = 0;
+    const beggingPhrases = [
+      "Hic... Tiểu thư Vy đừng bấm không mà 🥺",
+      "Một xíu thui ạ, chủ nhân Minh chuẩn bị kỹ lắm ó...",
+      "Robot buồn muốn khóc lun òi nè... Tiểu thư bấm Có điiii 😭",
+      "Tiểu thư thương tôi với, bấm Có nha nha nha? ❤️🥺"
+    ];
+
+    function handleChoice(isYes) {
+      if (isYes) {
+        startCountdownTransition();
+      } else {
+        heartAnimationActive = false;
+        document.getElementById('introHeartSlide').classList.remove('active');
+        document.getElementById('countdownSlide').classList.remove('active');
+        
+        document.getElementById('robotMainStage').classList.add('active');
+        document.getElementById('sadRetryBox').classList.add('active');
+        
+        sadEyes();
+        const phrase = beggingPhrases[begCount % beggingPhrases.length];
+        setCaption(phrase);
+        begCount++;
+
+        const yesBtn = document.getElementById('btnSadYes');
+        if (yesBtn) {
+          yesBtn.style.transform = `scale(${1 + Math.min(begCount * 0.08, 0.45)})`;
+        }
+      }
+    }
+
+    function acceptAfterBegging() {
+      document.getElementById('sadRetryBox').classList.remove('active');
+      robotFace.classList.remove('robot-sad');
+      resetEyes();
+      caption.classList.remove('active');
+
+      startCountdownTransition();
+    }
+
+    function startCountdownTransition() {
+      heartAnimationActive = false;
+      document.getElementById('introHeartSlide').classList.remove('active');
+      document.getElementById('sadRetryBox').classList.remove('active');
+      document.getElementById('robotMainStage').classList.remove('active');
+
+      const countSlide = document.getElementById('countdownSlide');
+      const countNum = document.getElementById('countdownNum');
+      countSlide.classList.add('active');
+
+      let currentSec = 3;
+      countNum.innerText = currentSec;
+      burstEffects(15);
+
+      const countdownInterval = setInterval(() => {
+        currentSec--;
+        if (currentSec > 0) {
+          countNum.innerText = currentSec;
+          burstEffects(12);
+        } else {
+          clearInterval(countdownInterval);
+          countSlide.classList.remove('active');
+          startMainStory();
+        }
+      }, 1000);
+    }
+
+    let isStoryStarted = false;
+    function startMainStory() {
+      if (isStoryStarted) return;
+      isStoryStarted = true;
+
+      document.getElementById('robotMainStage').classList.add('active');
+      resetEyes();
+      burstEffects(25);
+      happyEyes();
+
+      story.forEach(step => {
+        setTimeout(() => {
+          if (step.text) setCaption(step.text);
+          if (step.action) step.action();
+        }, step.time);
+      });
+    }
+
+    // 9. Kịch bản timeline lời thoại & ảnh
+    const story = [
+      { 
+        time: 500, 
+        text: "Gửi em bé của anh...",
+        action: () => blinkEyes(2) 
+      },
+      {
+        time: 4500,
+        text: "Hôm nay em đẹp quá >///<",
+        action: () => {
+          robotFace.classList.add('show-blush');
+          squintEyes();
+          showSinglePhoto('slide1');
+          burstEffects(15);
+        }
+      },
+      {
+        time: 8500,
+        text: "À thì sắp tới là 20/10 rồi...",
+        action: () => {
+          robotFace.classList.remove('show-blush');
+          resetEyes();
+          showSinglePhoto('slide2');
+        }
+      },
+      {
+        time: 12500,
+        text: "Chúc em luôn luôn ngập tràn sức khỏe ❤️",
+        action: () => {
+          happyEyes();
+          showSinglePhoto('slide3');
+          burstEffects(18);
+        }
+      },
+      {
+        time: 16500,
+        text: "Chúc em lúc nào cũng thật xinh đẹp và rạng rỡ 🌸",
+        action: () => {
+          happyEyes();
+          showSinglePhoto('slide4');
+          burstEffects(20);
+        }
+      },
+      {
+        time: 20500,
+        text: "Luôn giữ nụ cười hạnh phúc trên môi nhé ✨",
+        action: () => {
+          blinkEyes(1);
+          showSinglePhoto('slide5');
+        }
+      },
+      {
+        time: 25000,
+        text: "Thương em rất nhiều! Happy 20/10 Bé Yêu ❤️💐",
+        action: () => {
+          happyEyes();
+          showAllPhotos();
+          burstEffects(50);
+        }
+      },
+      {
+        time: 30500,
+        text: "Và anh có lời muốn gửi đến em...",
+        action: () => {
+          happyEyes();
+          showLetterAndType();
+          burstEffects(40);
+        }
+      }
+    ];
+
+    // 10. Nhạc & kích hoạt ban đầu
+    const audio = document.getElementById('bgMusic');
+    const disc = document.getElementById('disc');
+
+    function toggleAudio() {
+      if (!audio) return;
+      if (audio.paused) {
+        audio.play().catch(() => {});
+        disc.classList.remove('paused');
+      } else {
+        audio.pause();
+        disc.classList.add('paused');
+      }
+    }
+
+    function startShow() {
+      document.getElementById('start-overlay').style.display = 'none';
+
+      if (audio) {
+        audio.play().catch(e => {
+          console.warn("Nhạc chưa phát được hoặc thiếu file nhaccode.mp3:", e);
+        });
+      }
+
+      document.getElementById('introHeartSlide').classList.add('active');
+      drawParticleHeart();
+      burstEffects(20);
+
+      setInterval(spawnFallingItem, 160);
+      setInterval(spawnRisingHeart, 350);
+    }
+  </script>
+</body>
+</html>
